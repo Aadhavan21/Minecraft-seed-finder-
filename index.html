@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Minecraft Structure Finder — Accurate Java &amp; Bedrock Seed Search Engine</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <!-- Sticky Top Navigation Bar -->
+  <header class="site-header">
+    <div class="header-inner">
+      <div class="brand-group">
+        <div class="brand-cube" aria-hidden="true">MC</div>
+        <div>
+          <h1 class="brand-title">
+            Minecraft Structure Finder
+            <span class="brand-badge">WASM + Multi-Worker Engine</span>
+          </h1>
+          <p class="brand-subtitle">Two-stage Cubiomes-compatible Java 48-bit LCG &amp; Bedrock MT19937 structure seed searcher</p>
+        </div>
+      </div>
+
+      <!-- Quick Direct Seed Inspector -->
+      <div style="display:flex;align-items:center;gap:0.45rem;flex-wrap:wrap;">
+        <input
+          type="text"
+          id="customInspectSeedInput"
+          class="mc-input"
+          value="12345"
+          placeholder="Inspect specific seed..."
+          aria-label="Inspect specific seed"
+          style="width:175px;padding:0.45rem 0.7rem;font-size:0.82rem;"
+        />
+        <button type="button" id="btnInspectCustomSeed" class="mc-btn" style="padding:0.45rem 0.85rem;font-size:0.82rem;">
+          Inspect Seed Map
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="main-container">
+    <!-- STEP 1 & 3: Edition, Version & Distance Configuration -->
+    <section class="mc-panel" aria-labelledby="headingConfig">
+      <div class="panel-header">
+        <h2 id="headingConfig" class="panel-title">
+          <span class="step-pill">Step 1</span>
+          Edition, Version &amp; Maximum Distance from Spawn
+        </h2>
+        <span id="activeRngEngineLabel" style="font-size:0.76rem;color:#4ade80;font-weight:600;background:rgba(74,222,128,0.1);padding:0.22rem 0.65rem;border-radius:6px;border:1px solid rgba(74,222,128,0.3);">
+          48-bit Java LCG (0x5DEECE66D)
+        </span>
+      </div>
+
+      <div class="config-grid">
+        <!-- Edition Toggle -->
+        <div class="control-group">
+          <label class="control-label">
+            <span>Minecraft Edition</span>
+            <span style="color:#4ade80;font-size:0.73rem;">Separate Placement RNG</span>
+          </label>
+          <div class="edition-toggle" role="group" aria-label="Minecraft Edition Selector">
+            <button type="button" id="btnEditionJava" class="edition-btn active">
+              <span>☕ Java Edition</span>
+            </button>
+            <button type="button" id="btnEditionBedrock" class="edition-btn">
+              <span>🪨 Bedrock Edition</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Version Selector -->
+        <div class="control-group">
+          <label class="control-label" for="versionSelect">
+            <span>Minecraft Version</span>
+            <span style="color:#94a3b8;font-size:0.73rem;">Auto-Detects Latest Stable</span>
+          </label>
+          <select id="versionSelect" class="mc-select"></select>
+        </div>
+
+        <!-- Distance Slider (100 to 1000 blocks, step 50, default 500) -->
+        <div class="control-group">
+          <label class="control-label" for="distanceSlider">
+            <span>Max Horizontal Distance from World Spawn</span>
+            <span style="color:#94a3b8;font-size:0.73rem;">100m – 1,000m (Step 50)</span>
+          </label>
+          <div class="slider-box">
+            <div class="slider-row">
+              <input
+                type="range"
+                id="distanceSlider"
+                class="mc-slider"
+                min="100"
+                max="1000"
+                step="50"
+                value="500"
+              />
+              <span id="distanceValueBadge" class="slider-value-badge">500 blocks</span>
+            </div>
+            <div class="slider-ticks">
+              <span>100m</span>
+              <span>250m</span>
+              <span>500m</span>
+              <span>750m</span>
+              <span>1000m</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="activeVersionNotes" style="margin-top:0.85rem;font-size:0.79rem;color:#cbd5e1;background:#0d1422;padding:0.6rem 0.85rem;border-radius:8px;border:1px solid #26334d;"></div>
+    </section>
+
+    <!-- STEP 2: Visual Structure Selector with Authentic Minecraft Thumbnails -->
+    <section class="mc-panel" aria-labelledby="headingStructures">
+      <div class="panel-header">
+        <h2 id="headingStructures" class="panel-title">
+          <span class="step-pill">Step 2</span>
+          Select Target Structures
+          <span id="selectedCountBadge" class="brand-badge" style="margin-left:0.35rem;">3 Selected</span>
+        </h2>
+
+        <div class="btn-group">
+          <label for="villageVariantSelect" style="font-size:0.78rem;color:#cbd5e1;font-weight:600;">Village Biome:</label>
+          <select id="villageVariantSelect" class="mc-select" style="width:auto;padding:0.4rem 0.65rem;font-size:0.8rem;">
+            <option value="any">Any Village Biome (Plains, Desert, Savanna, Taiga, Snowy)</option>
+            <option value="plains">Plains / Meadow Village Only</option>
+            <option value="desert">Desert Village Only</option>
+            <option value="savanna">Savanna Village Only</option>
+            <option value="taiga">Taiga Village Only</option>
+            <option value="snowy">Snowy Village Only</option>
+          </select>
+          <button type="button" id="btnPresetStarter" class="mc-btn" style="padding:0.42rem 0.75rem;font-size:0.79rem;">
+            Starter Trio Preset
+          </button>
+          <button type="button" id="btnSelectAllStructures" class="mc-btn" style="padding:0.42rem 0.75rem;font-size:0.79rem;">
+            Select All
+          </button>
+          <button type="button" id="btnClearAllStructures" class="mc-btn" style="padding:0.42rem 0.75rem;font-size:0.79rem;">
+            Clear All
+          </button>
+        </div>
+      </div>
+
+      <!-- Active Selection Bar -->
+      <div id="selectedStructuresBar" class="selected-summary-bar" aria-live="polite"></div>
+
+      <!-- Feasibility & Geometric Rule Alerts -->
+      <div id="feasibilityWarningBox" class="hidden" style="margin-bottom:1rem;padding:0.7rem 0.9rem;background:rgba(250,204,21,0.1);border:1px solid rgba(250,204,21,0.4);border-radius:8px;color:#fef08a;font-size:0.8rem;"></div>
+
+      <!-- 21-Structure Visual Gallery Grid -->
+      <div id="structureGalleryGrid" class="structure-grid"></div>
+    </section>
+
+    <!-- STEP 3: Seed Search Engine Configuration & Live Telemetry -->
+    <section class="mc-panel" aria-labelledby="headingEngine">
+      <div class="panel-header">
+        <h2 id="headingEngine" class="panel-title">
+          <span class="step-pill">Step 3</span>
+          Two-Stage Seed Search Engine (WASM + Web Workers)
+        </h2>
+        <span id="telemetryStatusText" style="font-size:0.82rem;font-weight:700;color:#4ade80;">Ready to search</span>
+      </div>
+
+      <div class="config-grid" style="align-items:end;">
+        <div class="control-group">
+          <label class="control-label" for="searchModeSelect">
+            <span>Seed Search Space Mode</span>
+          </label>
+          <select id="searchModeSelect" class="mc-select">
+            <option value="range">Sequential 64-Bit Seed Range (Deterministic)</option>
+            <option value="random">Random 64-Bit World Seeds (Full Space Sampling)</option>
+          </select>
+        </div>
+
+        <div id="seedRangeInputsWrap" class="control-group" style="display:grid;grid-template-columns:1fr 1fr;gap:0.6rem;">
+          <div>
+            <label class="control-label" for="startSeedInput"><span>Start Seed</span></label>
+            <input type="text" id="startSeedInput" class="mc-input" value="1" />
+          </div>
+          <div>
+            <label class="control-label" for="endSeedInput"><span>End Seed</span></label>
+            <input type="text" id="endSeedInput" class="mc-input" value="1000000" />
+          </div>
+        </div>
+
+        <div class="control-group">
+          <label class="control-label" for="maxResultsSelect">
+            <span>Target Matching Seeds</span>
+          </label>
+          <select id="maxResultsSelect" class="mc-select">
+            <option value="5">Stop at 5 Matching Seeds</option>
+            <option value="10" selected>Stop at 10 Matching Seeds</option>
+            <option value="25">Stop at 25 Matching Seeds</option>
+            <option value="50">Stop at 50 Matching Seeds</option>
+          </select>
+        </div>
+
+        <div class="btn-group" style="justify-content:flex-end;">
+          <button type="button" id="btnStartSearch" class="mc-btn mc-btn-primary" style="flex:1;">
+            ▶ Start Seed Search
+          </button>
+          <button type="button" id="btnCancelSearch" class="mc-btn mc-btn-danger" disabled>
+            ■ Cancel
+          </button>
+        </div>
+      </div>
+
+      <!-- Progress Bar -->
+      <div class="progress-track" aria-label="Search progress">
+        <div id="searchProgressFill" class="progress-fill"></div>
+      </div>
+
+      <!-- Live Telemetry Cards -->
+      <div class="telemetry-grid">
+        <div class="telemetry-card">
+          <div class="telemetry-label">Seeds Tested</div>
+          <div id="telemetrySeedsTested" class="telemetry-value">0</div>
+        </div>
+        <div class="telemetry-card">
+          <div class="telemetry-label">Search Throughput</div>
+          <div id="telemetrySeedsPerSec" class="telemetry-value">0 /s</div>
+        </div>
+        <div class="telemetry-card">
+          <div class="telemetry-label">Elapsed Time</div>
+          <div id="telemetryElapsedTime" class="telemetry-value">0.00s</div>
+        </div>
+        <div class="telemetry-card">
+          <div class="telemetry-label">Matching Seeds Found</div>
+          <div id="telemetryMatchCount" class="telemetry-value" style="color:#4ade80;">0 / 10</div>
+        </div>
+        <div class="telemetry-card">
+          <div class="telemetry-label">Estimated Progress</div>
+          <div id="telemetryProgressPct" class="telemetry-value">0.0%</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- STEP 4: Results & Interactive Top-Down Map Workspace -->
+    <div class="workspace-split">
+      <!-- Left Column: Matching Seeds & Expandable Structure Breakdown -->
+      <section class="mc-panel" aria-labelledby="headingResults">
+        <div class="panel-header">
+          <h2 id="headingResults" class="panel-title">
+            <span class="step-pill">Results</span>
+            Verified Matching Worlds
+          </h2>
+          <span id="resultsCountHeaderBadge" class="brand-badge">0 Seeds Found</span>
+        </div>
+        <div id="resultsListContainer" class="results-list"></div>
+      </section>
+
+      <!-- Right Column: Interactive Top-Down World Map -->
+      <section id="mapSectionPanel" class="mc-panel" aria-labelledby="headingMap">
+        <div class="panel-header">
+          <h2 id="headingMap" class="panel-title">
+            <span class="step-pill">Map</span>
+            Interactive Top-Down World &amp; Structure Map
+          </h2>
+          <div style="display:flex;align-items:center;gap:0.75rem;font-size:0.78rem;color:#cbd5e1;">
+            <label style="display:flex;align-items:center;gap:0.3rem;cursor:pointer;">
+              <input type="checkbox" id="chkMapShowBiomes" checked style="accent-color:#4ade80;" />
+              Biomes
+            </label>
+            <label style="display:flex;align-items:center;gap:0.3rem;cursor:pointer;">
+              <input type="checkbox" id="chkMapShowAllNearby" style="accent-color:#4ade80;" />
+              Show All Nearby Structures
+            </label>
+          </div>
+        </div>
+
+        <div class="map-viewport-wrap">
+          <canvas id="seedMapCanvas"></canvas>
+          <div class="map-overlay-controls">
+            <button type="button" id="btnMapZoomIn" class="map-ctrl-btn" title="Zoom In" aria-label="Zoom In">+</button>
+            <button type="button" id="btnMapZoomOut" class="map-ctrl-btn" title="Zoom Out" aria-label="Zoom Out">−</button>
+            <button type="button" id="btnMapReset" class="map-ctrl-btn" title="Center on World Spawn" aria-label="Center on World Spawn">⌖</button>
+          </div>
+          <div id="mapHoverTooltip" class="map-tooltip hidden"></div>
+        </div>
+
+        <div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:0.5rem;margin-top:0.65rem;font-size:0.76rem;color:#94a3b8;">
+          <span id="mapCursorCoords">Hover or tap the map to inspect block &amp; chunk coordinates</span>
+          <span>Drag to pan · Scroll or pinch to zoom · Solid green ring = Max Distance</span>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <div id="toastNotification" class="toast-notification hidden" role="status" aria-live="polite"></div>
+
+  <!-- Modular Engine & Application Scripts -->
+  <script src="engine/wasm/cubiomes_wasm_inline.js"></script>
+  <script src="version-data.js"></script>
+  <script src="structures.js"></script>
+  <script src="search-worker.js"></script>
+  <script src="map.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
