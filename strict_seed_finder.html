@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Minecraft Java 1.21+ Strict 64-Bit Seed Finder (Side-by-Side Edition)</title>
+  <link rel="stylesheet" href="strict_seed_finder.css" />
+</head>
+<body>
+  <header class="top-bar">
+    <div class="brand">
+      <div class="mc-cube"></div>
+      <div>
+        <h1>MC 64-Bit Seed Finder <span class="badge">Strict Verification Mode</span></h1>
+        <p>Authentic Java <code>Random</code> 64-bit LCG region math • Rejects mathematically impossible &amp; unfound searches</p>
+      </div>
+    </div>
+    <div class="engine-status">
+      <span class="dot"></span> Strict LCG Validation (Zero Fake Results)
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- Left Panel: Search Filters -->
+    <section class="panel controls-panel">
+      <h2>1. Select Target Structures</h2>
+      <p class="hint">Uses Minecraft Java Edition's exact region spacing, separation, and structure salt constants.</p>
+
+      <div class="structure-grid" id="structureList"></div>
+
+      <div class="control-group">
+        <div class="slider-header">
+          <label for="radiusSlider">Max Distance from Spawn (0, 0)</label>
+          <span class="radius-val" id="radiusValue">500 blocks</span>
+        </div>
+        <input type="range" id="radiusSlider" min="100" max="1000" step="25" value="500" />
+        <div class="range-labels">
+          <span>100m</span>
+          <span>500m</span>
+          <span>1000m</span>
+        </div>
+      </div>
+
+      <div class="control-group">
+        <label for="seedMode">Seed Search Mode</label>
+        <select id="seedMode" class="select-input">
+          <option value="lcg_live">Live 64-Bit Java LCG Scan (Full 19-Digit Seeds)</option>
+          <option value="verified_db">Verified Speedrun &amp; Showcase Seeds (1.21+)</option>
+        </select>
+      </div>
+
+      <button id="searchBtn" class="btn-primary">
+        <span class="btn-icon">⚡</span> Scan 64-Bit Seeds (Strict Check)
+      </button>
+
+      <div class="stats-bar" id="scanStats">
+        Ready to run strict 64-bit Java structure validation.
+      </div>
+    </section>
+
+    <!-- Middle Panel: Interactive Structure Map -->
+    <section class="panel map-panel">
+      <div class="map-header">
+        <div>
+          <h2>2. Interactive Structure Map</h2>
+          <p class="hint">Switch between discovered seeds to inspect exact block coordinates.</p>
+        </div>
+        <div class="seed-switcher">
+          <label for="activeSeedSelect">Inspect Seed:</label>
+          <select id="activeSeedSelect" class="select-input" disabled>
+            <option value="0">No valid seeds loaded</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Quick 1-10 Pill Selector -->
+      <div class="seed-pills" id="seedPills"></div>
+
+      <div class="canvas-wrapper">
+        <canvas id="radarCanvas" width="560" height="560"></canvas>
+        <div id="mapTooltip" class="tooltip hidden"></div>
+      </div>
+
+      <div class="active-seed-bar" id="activeSeedBanner">
+        <span>Selected Full 64-Bit Seed:</span>
+        <code id="bannerSeedText">—</code>
+        <button id="copyBannerBtn" class="btn-small" disabled>Copy Seed</button>
+      </div>
+    </section>
+
+    <!-- Right Panel: Strict Verified Results / Denial Notice -->
+    <section class="panel results-panel">
+      <div class="results-header">
+        <h2>3. Verified 64-Bit Seeds (Up to 10)</h2>
+        <span class="count-pill" id="resultCount">0 / 10</span>
+      </div>
+      <p class="hint">Only seeds passing 100% of strict criteria within your exact radius are shown.</p>
+
+      <div class="results-list" id="resultsList">
+        <div class="empty-state">
+          Select structures and click <strong>Scan 64-Bit Seeds</strong>. Impossible combinations will be denied.
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="strict_seed_engine.js"></script>
+  <script src="strict_seed_app.js"></script>
+</body>
+</html>
